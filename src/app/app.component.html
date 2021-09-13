@@ -3,28 +3,54 @@
 
   {{registrationForm.value | json}}
 
-  <form [formGroup]="registrationForm" >
+  <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" >
     <div class="form-group" >
       <label>Username</label>
-      <input [class.is-invalid]="registrationForm.controls.userName.invalid && registrationForm.controls.userName.touched"
+      <input [class.is-invalid]="registrationForm.controls.userName.invalid
+             && registrationForm.controls.userName.touched"
              formControlName="userName" type="text" class="form-control">
 <!--      <small [class.d-none]="registrationForm.controls.userName.valid ||-->
 <!--                             registrationForm.controls.userName.untouched"-->
 <!--                              class="text-danger">Username is required</small>-->
       <div *ngIf="registrationForm.controls.userName.invalid && registrationForm.controls.userName.touched">
-        <small *ngIf="registrationForm.controls.userName.errors?.required" class="text-danger">Username is required</small>
-        <small *ngIf="registrationForm.controls.userName.errors?.minlength" class="text-danger">Username needs to be at least 3 characters</small>
+        <small *ngIf="registrationForm.controls.userName.errors?.required" class="text-danger">
+          Username is required
+        </small>
+        <small *ngIf="registrationForm.controls.userName.errors?.minlength" class="text-danger">
+          Username needs to be at least 3 characters
+        </small>
+        <small *ngIf="registrationForm.controls.userName.errors?.forbiddenName" class="text-danger">
+          {{registrationForm.controls.userName.errors?.forbiddenName.value}} Username not allowed
+        </small>
       </div>
     </div>
 
     <div class="form-group">
       <label>Password</label>
-      <input formControlName="password" type="password" class="form-control">
+      <input  formControlName="password" type="password" class="form-control">
     </div>
 
     <div class="form-group">
       <label>Confirm Password</label>
-      <input formControlName="confirmPassword" type="password" class="form-control">
+      <input [class.is-invalid]="registrationForm.errors?.misMatch"
+             formControlName="confirmPassword" type="password" class="form-control">
+      <small class="text-danger" *ngIf="registrationForm.errors?.misMatch">
+        Passwords do not match
+      </small>
+    </div>
+
+    <div class="form-group">
+      <label>Email</label>
+      <button type="button" class="btn btn-secondary btn-sm m-2" (click)="addAlternateEmail()">Add new email</button>
+      <input type="text" formControlName="email" class="form-control">
+      <div formArrayName="alternateEmails" *ngFor="let email of alternateEmails.controls; let i=index">
+        <input type="text" class="form-control my-1" [formControlName]="i">
+      </div>
+    </div>
+
+    <div class="form-check mb-3">
+      <input class="form-check-input" formControlName="subscribe" type="checkbox">
+      <label class="form-check-label">Send me promotional offers</label>
     </div>
 
     <div formGroupName="address">
@@ -46,7 +72,7 @@
 
     </div>
 
-    <button class="btn btn-primary" type="submit">
+    <button [disabled]="!registrationForm.valid" class="btn btn-primary" type="submit">
       Register
     </button>
     <button (click)="loadApi()" class="btn btn-secondary ml-2" type="button">
